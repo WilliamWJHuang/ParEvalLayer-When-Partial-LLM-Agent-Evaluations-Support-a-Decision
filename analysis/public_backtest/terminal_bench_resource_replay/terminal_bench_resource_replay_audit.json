@@ -1,0 +1,46 @@
+{
+  "alpha": 0.05,
+  "bootstrap_samples": 80,
+  "budget_caps": [
+    0.05,
+    0.1,
+    0.15,
+    0.2,
+    0.25,
+    0.3,
+    0.35,
+    0.4,
+    0.45,
+    0.5,
+    0.55,
+    0.6,
+    0.65,
+    0.7,
+    0.75,
+    0.8,
+    0.85,
+    0.9,
+    0.95
+  ],
+  "budget_metrics": [
+    "task_fraction",
+    "tested_time",
+    "pair_time"
+  ],
+  "coverage_group_note": "No task-stratum floor was applied; public Terminal-Bench result JSON does not expose native task-domain labels.",
+  "coverage_mode": "none",
+  "min_resource_completeness": 0.95,
+  "n_replays": 200,
+  "possible_directed_pairs": 90,
+  "seed": 20260613,
+  "shared_tasks_after_overlap_gate_median": 89,
+  "systems": 10,
+  "task_names_in_input": 178,
+  "task_rows": "analysis/public_backtest/terminal_bench/terminal_bench_task_rows.csv",
+  "thresholds": [
+    0.0,
+    0.05,
+    0.1
+  ],
+  "usable_directed_pairs": 72
+}

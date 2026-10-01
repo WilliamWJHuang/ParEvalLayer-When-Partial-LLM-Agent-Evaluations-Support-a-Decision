@@ -1,0 +1,9 @@
+archive_path,system_id,system_label,entry_count,all_result_files,result_files,parsed_results,max_steps,model,model_type,kept
+OSWorldSurfer-Holo3-35B-A3B-20260330-OSWorld-Verified_20260420_verified-run_with-local-rewards.zip,OSWorldSurfer-Holo3-35B-A3B-20260330-OSWorld-Verified_20260420_verified-run_with-local-rewards,OSWorldSurfer-Holo3-35B-A3B-20260330-OSWorld-Verified_20260420_verified-run_with-local-rewards,2226,2,718,716,,OSWorldSurfer-Holo3-35B-A3B-20260330-OSWorld-Verified_20260420_verified-run_with-local-rewards,,True
+claude-sonnet-4-5-20250929_100steps.zip,claude-sonnet-4-5-20250929_100steps,global.anthropic.claude-sonnet-4-5-20250929-v1:0 (100 steps),13383,1,360,360,100,global.anthropic.claude-sonnet-4-5-20250929-v1:0,,True
+evocua_20260105.zip,evocua_20260105,EvoCUA (50 steps),12052,1,360,360,50,EvoCUA,,True
+evocua_8b_20260105.zip,evocua_8b_20260105,EvoCUA (50 steps),12965,1,361,361,50,EvoCUA,,True
+mobile-agent-v3-gui-owl-7b.zip,mobile-agent-v3-gui-owl-7b,mobile-agent-v3-gui-owl-7b,5842,1,361,361,,mobile-agent-v3-gui-owl-7b,,True
+mobileagent_v3.zip,mobileagent_v3,mobileagent_v3,11391,1,359,359,,mobileagent_v3,,True
+o3_100steps.zip,o3_100steps,o3 (100 steps),20809,1,361,361,100,o3,,True
+o3_gta1_100steps.zip,o3_gta1_100steps,o3 (100 steps),12756,1,361,354,100,o3,,True

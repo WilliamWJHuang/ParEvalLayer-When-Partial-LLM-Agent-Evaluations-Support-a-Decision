@@ -1,0 +1,15 @@
+{
+  "agent_time_non_null_trials": 2502,
+  "base_path": "submissions/terminal-bench/2.0",
+  "coverage_group_source": "inferred from task-name prefix; not a native Terminal-Bench domain label",
+  "max_systems": 10,
+  "native_cost_usd_non_null_trials": 156,
+  "repo": "harborframework/terminal-bench-2-leaderboard",
+  "systems": 10,
+  "systems_requested": [],
+  "task_rows": 890,
+  "tasks": 178,
+  "token_non_null_trials": 1115,
+  "trial_rows": 2670,
+  "wall_time_non_null_trials": 2670
+}

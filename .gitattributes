@@ -1,0 +1,5 @@
+# Checksums cover exact file bytes. Preserve them across Git checkouts.
+* -text
+*.png binary
+*.pdf binary
+*.zip binary

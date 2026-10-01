@@ -1,0 +1,31 @@
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+outputs/
+.env
+.env.*
+!.env.example
+credentials*
+secrets*
+*.pem
+*.key
+
+# Public replay inputs and generated outputs are ignored by default. Release
+# maintainers should add narrow allowlist rules for reviewed files that ship.
+analysis/public_backtest/**
+!analysis/public_backtest/
+!analysis/public_backtest/osworld_verified/
+!analysis/public_backtest/osworld_verified/osworld_verified_task_rows.csv
+!analysis/public_backtest/osworld_verified/osworld_verified_archive_audit.csv
+!analysis/public_backtest/osworld_verified/osworld_verified_pair_audit.csv
+!analysis/public_backtest/terminal_bench/
+!analysis/public_backtest/terminal_bench/terminal_bench_task_rows.csv
+!analysis/public_backtest/terminal_bench/terminal_bench_matrix_audit.json
+!analysis/public_backtest/terminal_bench/terminal_bench_matrix_audit.csv
+!analysis/public_backtest/terminal_bench_resource_replay/
+!analysis/public_backtest/terminal_bench_resource_replay/terminal_bench_resource_aggregate.csv
+!analysis/public_backtest/terminal_bench_resource_replay/terminal_bench_resource_minimum_budgets.csv
+!analysis/public_backtest/terminal_bench_resource_replay/terminal_bench_resource_replay_audit.json

@@ -1,0 +1,17 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite the accompanying paper."
+title: "ParEvalLayer"
+type: software
+authors:
+  - family-names: "Huang"
+    given-names: "Wei-Jung"
+  - family-names: "Shen"
+    given-names: "Bonan"
+preferred-citation:
+  type: article
+  title: "ParEvalLayer: When Partial LLM-Agent Evaluations Support a Decision"
+  authors:
+    - family-names: "Huang"
+      given-names: "Wei-Jung"
+    - family-names: "Shen"
+      given-names: "Bonan"

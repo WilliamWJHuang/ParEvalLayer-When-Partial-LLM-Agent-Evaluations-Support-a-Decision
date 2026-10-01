@@ -1,0 +1,10 @@
+source,threshold,policy_alpha,budget_metric,policy_label,minimum_sufficient_budget,defer_rate_at_minimum,observed_tasks_mean_at_minimum,observed_resource_fraction_mean_at_minimum
+Terminal-Bench 2.0,0.0,0.05,pair_time,pair_time no-strata bootstrap,,,,
+Terminal-Bench 2.0,0.0,0.05,task_fraction,task_fraction no-strata bootstrap,,,,
+Terminal-Bench 2.0,0.0,0.05,tested_time,tested_time no-strata bootstrap,,,,
+Terminal-Bench 2.0,0.05,0.05,pair_time,pair_time no-strata bootstrap,,,,
+Terminal-Bench 2.0,0.05,0.05,task_fraction,task_fraction no-strata bootstrap,,,,
+Terminal-Bench 2.0,0.05,0.05,tested_time,tested_time no-strata bootstrap,,,,
+Terminal-Bench 2.0,0.1,0.05,pair_time,pair_time no-strata bootstrap,,,,
+Terminal-Bench 2.0,0.1,0.05,task_fraction,task_fraction no-strata bootstrap,,,,
+Terminal-Bench 2.0,0.1,0.05,tested_time,tested_time no-strata bootstrap,,,,

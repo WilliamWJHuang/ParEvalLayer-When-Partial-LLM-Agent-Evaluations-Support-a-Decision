@@ -1,0 +1,14 @@
+{
+  "source_path": "analysis/public_backtest/osworld_verified/raw/hf_tree.json",
+  "selection": "Entries whose archive_path appears in osworld_verified_archive_audit.csv.",
+  "archives": [
+    {"archive_path":"OSWorldSurfer-Holo3-35B-A3B-20260330-OSWorld-Verified_20260420_verified-run_with-local-rewards.zip","oid":"b97a1e0f726f2621a851fbe72d5c57aca1f73a1f","lfs_oid":"0dea53ac7b04fa7d962c2da48e4c5b4023455c221043378fe1857daf97251ca4","last_commit_id":"7039a9675e7642a0fe3ef0e2ff92e453bf49897c"},
+    {"archive_path":"claude-sonnet-4-5-20250929_100steps.zip","oid":"89ffee04bf5db6999e9f2962483f0d2c1c126110","lfs_oid":"6d5730442e9e144db3d21cf647bd350646f60cf6b92cde2f3920fb5d249b2c76","last_commit_id":"4a51605d35a9506dea7d450231c0a3ef88e7e154"},
+    {"archive_path":"evocua_20260105.zip","oid":"fdab596ede865d1433bc942054b72321e18c5370","lfs_oid":"32b19a2689295e22619c2717fdeac9b7e9cfecf9a13c624eb0e3053efddd394e","last_commit_id":"cdb5a8377ea564e23fce40980eb41164d68f2d1b"},
+    {"archive_path":"evocua_8b_20260105.zip","oid":"5a33e6b9dd8f403db611e6192fcf6ac72ee0d89c","lfs_oid":"5aad7c667057647983587ee45f8e65615d0afa7bf6fe215905c998e54e5d5991","last_commit_id":"095df74f0d4e801f4e5fe5e121bf4952dd6ddbb6"},
+    {"archive_path":"mobile-agent-v3-gui-owl-7b.zip","oid":"492e6f9a2f6e669d1c5afb906956e1b7f916254d","lfs_oid":"1071009ac420f5a414ad3a039f87beaf838a17fb65558c0894238e3b41e2b3d7","last_commit_id":"d2e377303fbcb2e7a4f1cc8fcf33551d95d64414"},
+    {"archive_path":"mobileagent_v3.zip","oid":"1181c5293b07ba59a732968fa0d538abdf953b6c","lfs_oid":"623306e378bd82e47e616cd4a2c6ef980c642305965e2e0d6f175f88e9e561a3","last_commit_id":"35c878c1402c18507a56ebff8486f7aae073c894"},
+    {"archive_path":"o3_100steps.zip","oid":"e4076bf505140d515eb577d6dd0c639df607c3b1","lfs_oid":"f4a3d25e606dfe9564af32bc31c9a42c23e2d4a1847488276e06486d4a51e4b1","last_commit_id":"2a5edaf12400ae7a2dd8bc9faf12cde659cc6440"},
+    {"archive_path":"o3_gta1_100steps.zip","oid":"26a445b4ec55d3f0a1a2ad2b99aae16982d01504","lfs_oid":"57a16cdcbdac2d71b1a05b4624140e724254bd94ae5d587a1c486ff1e52a2aaf","last_commit_id":"a847607c94434b8773ec8427435b72814ee15c05"}
+  ]
+}
