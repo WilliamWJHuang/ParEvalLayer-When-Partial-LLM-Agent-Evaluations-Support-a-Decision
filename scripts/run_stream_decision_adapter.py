@@ -23,8 +23,8 @@ from run_decision_layer_demo import (
     rng_for_budget,
 )
 from stream_decision_schema import (
+    validate_event_against_manifest,
     validate_stream_manifest,
-    validate_task_outcome_event,
     validate_terminal_decision_record,
     validate_trace_record,
 )
@@ -517,17 +517,33 @@ def consume_stream(
     last_event_index = 0
 
     with stream_path.open("r", encoding="utf-8") as handle:
-        for line in handle:
-            event = json.loads(line)
+        for line_number, line in enumerate(handle, start=1):
+            try:
+                event = json.loads(line)
+            except json.JSONDecodeError as exc:
+                raise ValueError(
+                    f"{stream_path}:{line_number}: invalid JSON: {exc}"
+                ) from exc
+            if not isinstance(event, dict):
+                raise ValueError(
+                    f"{stream_path}:{line_number}: JSONL rows must be objects."
+                )
             if event.get("event_type") == "stream_manifest":
+                if manifest is not None or line_number != 1:
+                    raise ValueError(
+                        "Stream must contain exactly one manifest, as its first record."
+                    )
                 validate_stream_manifest(event)
                 manifest = event
                 continue
             if manifest is None:
-                raise ValueError("Task outcome event appeared before stream manifest.")
+                raise ValueError("Stream manifest must be the first record.")
             if event.get("event_type") != "task_outcome":
-                continue
-            validate_task_outcome_event(event)
+                raise ValueError(
+                    f"Unsupported event_type at line {line_number}: "
+                    f"{event.get('event_type')!r}."
+                )
+            validate_event_against_manifest(event, manifest)
 
             event_index = int(event["event_index"])
             if event_index <= last_event_index:

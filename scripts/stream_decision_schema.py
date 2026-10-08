@@ -114,8 +114,10 @@ def validate_stream_manifest(event: dict[str, Any]) -> None:
     _require_string(event["source"], "manifest.source")
     _require_string(event["run_id"], "manifest.run_id")
     systems = _require_mapping(event["systems"], "manifest.systems")
-    _require_string(systems.get("tested"), "manifest.systems.tested")
-    _require_string(systems.get("comparison"), "manifest.systems.comparison")
+    tested = _require_string(systems.get("tested"), "manifest.systems.tested")
+    comparison = _require_string(systems.get("comparison"), "manifest.systems.comparison")
+    if tested == comparison:
+        _fail("manifest.systems.tested and manifest.systems.comparison must be distinct.")
     metric = _require_string(event["budget_metric"], "manifest.budget_metric")
     if metric not in ALLOWED_BUDGET_METRICS:
         _fail(f"manifest.budget_metric is unsupported: {metric}.")
@@ -168,6 +170,28 @@ def validate_task_outcome_event(event: dict[str, Any]) -> None:
     for key in ["cost_usd", "agent_execution_seconds"]:
         if key in resource and resource[key] is not None:
             _require_nonnegative_number(resource[key], f"task_outcome.resource.{key}")
+
+
+def validate_event_against_manifest(
+    event: dict[str, Any],
+    manifest: dict[str, Any],
+) -> None:
+    """Validate task-event identity fields against the stream manifest.
+
+    ``source`` remains optional on task events for compatibility with legacy
+    valid streams. When present, it must identify the manifest source.
+    """
+    validate_task_outcome_event(event)
+    if event["run_id"] != manifest["run_id"]:
+        _fail("task_outcome.run_id must match manifest.run_id.")
+    role = str(event["role"])
+    expected_system = manifest["systems"][role]
+    if event["system"] != expected_system:
+        _fail(f"task_outcome.system must match manifest.systems.{role}.")
+    if "source" in event and event["source"] != manifest["source"]:
+        _fail("task_outcome.source must match manifest.source when present.")
+    if event["group"] not in manifest["group_counts"]:
+        _fail("task_outcome.group must be declared in manifest.group_counts.")
 
 
 def _validate_common_decision_record(record: dict[str, Any], *, trace: bool) -> None:
@@ -302,10 +326,16 @@ def read_jsonl(path: Path) -> list[dict[str, Any]]:
 def validate_stream_file(path: Path) -> dict[str, int]:
     rows = read_jsonl(path)
     validate_stream_manifest(rows[0])
+    manifest = rows[0]
     last_index = 0
     task_events = 0
     for row in rows[1:]:
-        validate_task_outcome_event(row)
+        event_type = row.get("event_type")
+        if event_type == "stream_manifest":
+            _fail(f"{path}: stream must contain exactly one manifest, as its first record.")
+        if event_type != "task_outcome":
+            _fail(f"{path}: unsupported event_type: {event_type!r}.")
+        validate_event_against_manifest(row, manifest)
         event_index = int(row["event_index"])
         if event_index <= last_index:
             _fail(f"{path}: event_index must be strictly increasing.")

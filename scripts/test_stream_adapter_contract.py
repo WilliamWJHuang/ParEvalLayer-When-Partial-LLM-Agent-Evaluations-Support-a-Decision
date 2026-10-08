@@ -138,6 +138,27 @@ def invalid_stream(rows: list[dict[str, Any]], mode: str) -> list[dict[str, Any]
     ]
     if mode == "missing_manifest":
         return mutated[1:]
+    if mode == "repeated_manifest":
+        return mutated[:1] + [json.loads(json.dumps(mutated[0]))] + mutated[1:]
+    if mode == "unrecognized_event":
+        mutated.insert(1, {"event_type": "heartbeat"})
+        return mutated
+    if mode == "wrong_run_id":
+        mutated[task_indices[0]]["run_id"] = "another-run"
+        return mutated
+    if mode == "wrong_system":
+        mutated[task_indices[0]]["system"] = "another-system"
+        return mutated
+    if mode == "wrong_source":
+        mutated[task_indices[0]]["source"] = "Another Source"
+        return mutated
+    if mode == "undeclared_group":
+        mutated[task_indices[0]]["group"] = "undeclared"
+        mutated[task_indices[1]]["group"] = "undeclared"
+        return mutated
+    if mode == "same_manifest_systems":
+        mutated[0]["systems"]["comparison"] = mutated[0]["systems"]["tested"]
+        return mutated
     if mode == "nonmonotone_event_index":
         mutated[task_indices[1]]["event_index"] = mutated[task_indices[0]]["event_index"]
         return mutated
@@ -184,6 +205,13 @@ def main() -> None:
     invalid_results = []
     for mode in [
         "missing_manifest",
+        "repeated_manifest",
+        "unrecognized_event",
+        "wrong_run_id",
+        "wrong_system",
+        "wrong_source",
+        "undeclared_group",
+        "same_manifest_systems",
         "nonmonotone_event_index",
         "bad_role",
         "negative_resource",

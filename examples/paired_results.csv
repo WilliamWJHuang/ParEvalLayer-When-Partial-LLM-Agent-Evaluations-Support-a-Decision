@@ -1,0 +1,9 @@
+task_id,tested_score,comparison_score,group
+illustrative_01,0.82,0.64,domain_a
+illustrative_02,0.74,0.61,domain_b
+illustrative_03,0.91,0.70,domain_a
+illustrative_04,0.68,0.57,domain_b
+illustrative_05,0.87,0.66,domain_a
+illustrative_06,0.79,0.62,domain_b
+illustrative_07,0.84,0.65,domain_a
+illustrative_08,0.76,0.60,domain_b

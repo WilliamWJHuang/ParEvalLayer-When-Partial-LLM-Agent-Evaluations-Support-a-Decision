@@ -112,6 +112,7 @@ def contract_check(output_dir: Path) -> None:
             str(output_dir / "contract_check"),
         ]
     )
+    run([sys.executable, "scripts/test_compare.py"])
 
 
 def benchmark_pipeline(suite: str, output_dir: Path) -> None:
