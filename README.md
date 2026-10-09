@@ -1,8 +1,14 @@
-# ParEvalLayer
+# ParEvalLayer: Partial Evaluation for LLM Agents
 
-ParEvalLayer compares scored results from two agents on the same tasks. Give it a CSV of paired scores and an improvement threshold. It produces a readable report and structured decision records: `promote`, `reject`, or `abstain` under the specified policy.
+[![Tests](https://github.com/WilliamWJHuang/ParEvalLayer-When-Partial-LLM-Agent-Evaluations-Support-a-Decision/actions/workflows/smoke.yml/badge.svg?branch=main)](https://github.com/WilliamWJHuang/ParEvalLayer-When-Partial-LLM-Agent-Evaluations-Support-a-Decision/actions/workflows/smoke.yml) · [MIT License](LICENSE) · Python 3.12
+
+ParEvalLayer is an open-source decision layer for LLM agent evaluation. It compares scored results from two agents on the same tasks. Give it a CSV of paired scores and an improvement threshold. It produces a readable report and structured decision records: `promote`, `reject`, or `abstain` under the specified policy.
 
 Use your existing benchmark or evaluation harness to run and score the agents. ParEvalLayer reads those results; it can also replay selected prefixes of the file to examine decisions under partial evaluation budgets.
+
+[Quick start](#quick-start) · [Worked example](docs/TUTORIAL.md) · [Use your own results](docs/USING_YOUR_RESULTS.md) · [Method and limits](docs/METHOD.md)
+
+![ParEvalLayer workflow: paired task scores from an agent and baseline are replayed at fixed task-budget caps to produce decision reports. Inputs are already scored; the replay is retrospective.](assets/social-preview.png)
 
 This repository accompanies *ParEvalLayer: When Partial LLM-Agent Evaluations Support a Decision* by Wei-Jung Huang and Bonan Shen. It contains the decision-layer code, contract checks, source adapters, replay analyses, and small synthetic examples. The paper and PDF are not included here.
 
@@ -32,6 +38,14 @@ python compare.py --input examples/paired_results.csv --tested candidate --compa
 ```
 
 Read `outputs/comparison/report.md` for the comparison. The same directory contains `summary.csv`, decision records, the normalized task stream, and the run configuration. The example uses synthetic scores and requires no downloads or API keys.
+
+The supplied eight-task example produces this summary at the default full-file cap:
+
+| Task fraction | Paired tasks | Mean candidate minus baseline score | Action |
+| ---: | ---: | ---: | --- |
+| 1.0 | 8 | 0.17 | `promote` |
+
+This is an illustration of the interface, not a benchmark result. The [worked tutorial](docs/TUTORIAL.md) follows the same file through a partial-budget comparison and explains how to read the result.
 
 ## Compare your own agents
 
@@ -107,6 +121,10 @@ Availability of an input does not imply that every paper result can be regenerat
 ## Citation
 
 Citation metadata are provided in [CITATION.cff](CITATION.cff), including the paper title and authors.
+
+## Help and contributions
+
+Use [GitHub Issues](https://github.com/WilliamWJHuang/ParEvalLayer-When-Partial-LLM-Agent-Evaluations-Support-a-Decision/issues) for questions, bugs, and proposed adapters. For a reproducible bug report, include the command, Python version, error message, and a minimal synthetic CSV. For code changes, describe the intended behavior and run `python reproduce.py --check`. Changes to the statistical policy should state which assumption or decision rule they alter.
 
 ## License
 

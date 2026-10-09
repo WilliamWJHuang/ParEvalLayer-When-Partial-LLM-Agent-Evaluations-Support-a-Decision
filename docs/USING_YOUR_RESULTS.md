@@ -2,6 +2,8 @@
 
 ParEvalLayer accepts task scores that your evaluation harness has already produced. It does not execute agents, define benchmark tasks, or grade responses. You need a candidate system, a comparison system, and results for both on the same tasks.
 
+For a complete example with expected output, start with [How to compare two LLM agents using paired evaluation scores](TUTORIAL.md).
+
 ## Prepare paired scores
 
 Save a UTF-8 CSV with these columns:

@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="640" viewBox="0 0 1280 640" role="img" aria-labelledby="title desc">
+<title id="title">ParEvalLayer: Partial evaluation for LLM agents</title>
+<desc id="desc">Paired scores from an agent and a baseline, fixed task prefixes, and decision reports. Uses already scored results and retrospective replay.</desc>
+<rect width="1280" height="640" fill="#F7F8F4"/>
+<text x="64" y="57.94" font-family="Segoe UI, Arial, sans-serif" font-size="17" font-weight="600" fill="#177F73">OPEN-SOURCE RESEARCH SOFTWARE</text>
+<text x="60" y="153.04" font-family="Segoe UI, Arial, sans-serif" font-size="72" font-weight="600" fill="#15353C">ParEvalLayer</text>
+<text x="64" y="215.24" font-family="Segoe UI, Arial, sans-serif" font-size="32" font-weight="400" fill="#4B6266">Partial evaluation for LLM agents</text>
+<rect x="64" y="288" width="352" height="188" rx="16" fill="#FFFFFF" stroke="#D5E0DD"/>
+<text x="88" y="323.94" font-family="Segoe UI, Arial, sans-serif" font-size="17" font-weight="600" fill="#177F73">01  INPUT</text>
+<text x="88" y="373.78" font-family="Segoe UI, Arial, sans-serif" font-size="29" font-weight="600" fill="#15353C">Paired scores</text>
+<text x="88" y="418.22" font-family="Segoe UI, Arial, sans-serif" font-size="21" font-weight="400" fill="#4B6266">Your agent + baseline</text>
+<text x="88" y="449.22" font-family="Segoe UI, Arial, sans-serif" font-size="21" font-weight="400" fill="#4B6266">Same tasks, same scorer</text>
+<rect x="464" y="288" width="352" height="188" rx="16" fill="#FFFFFF" stroke="#D5E0DD"/>
+<text x="488" y="323.94" font-family="Segoe UI, Arial, sans-serif" font-size="17" font-weight="600" fill="#177F73">02  REPLAY</text>
+<text x="488" y="373.78" font-family="Segoe UI, Arial, sans-serif" font-size="29" font-weight="600" fill="#15353C">Fixed task prefixes</text>
+<text x="488" y="418.22" font-family="Segoe UI, Arial, sans-serif" font-size="21" font-weight="400" fill="#4B6266">CSV order preserved</text>
+<text x="488" y="449.22" font-family="Segoe UI, Arial, sans-serif" font-size="21" font-weight="400" fill="#4B6266">Choose task-budget caps</text>
+<rect x="864" y="288" width="352" height="188" rx="16" fill="#FFFFFF" stroke="#D5E0DD"/>
+<text x="888" y="323.94" font-family="Segoe UI, Arial, sans-serif" font-size="17" font-weight="600" fill="#177F73">03  REPORT</text>
+<text x="888" y="373.78" font-family="Segoe UI, Arial, sans-serif" font-size="29" font-weight="600" fill="#15353C">Decision records</text>
+<text x="888" y="418.22" font-family="Segoe UI, Arial, sans-serif" font-size="21" font-weight="400" fill="#4B6266">promote / reject / abstain</text>
+<text x="888" y="449.22" font-family="Segoe UI, Arial, sans-serif" font-size="21" font-weight="400" fill="#4B6266">Report, CSV, and JSONL</text>
+<path d="M432 382 h17 m-7 -7 l7 7 -7 7" fill="none" stroke="#177F73" stroke-width="3"/>
+<path d="M832 382 h17 m-7 -7 l7 7 -7 7" fill="none" stroke="#177F73" stroke-width="3"/>
+<text x="64" y="538.68" font-family="Segoe UI, Arial, sans-serif" font-size="24" font-weight="400" fill="#15353C">Already scored results. Retrospective replay.</text>
+<text x="64" y="587.58" font-family="Segoe UI, Arial, sans-serif" font-size="19" font-weight="400" fill="#4B6266">CSV input  /  Python  /  MIT-licensed code</text>
+</svg>
