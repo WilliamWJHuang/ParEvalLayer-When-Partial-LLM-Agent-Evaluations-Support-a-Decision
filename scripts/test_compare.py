@@ -263,7 +263,17 @@ class CompareWorkflowTests(unittest.TestCase):
             {"stream.jsonl", "decisions.jsonl", "trace.jsonl", "summary.csv", "report.md", "run.json"},
         )
         report = (output / "report.md").read_text(encoding="utf-8")
-        for phrase in ("not establish that the tested system is worse", "fixed-prefix retrospective", "no live monitoring", "without multiplicity adjustment", "not p-values"):
+        for phrase in (
+            "strictly greater",
+            "same meaningful units",
+            "does not necessarily mean the tested agent is worse",
+            "selected task count from the completed input file",
+            "first tasks in your completed results",
+            "does not control a live agent",
+            "does not correct for those extra attempts",
+            "not the probability that the tested system is better",
+            "not proof that the systems are the same",
+        ):
             self.assertIn(phrase, report)
 
     def test_packaged_example_is_clearly_illustrative_and_has_eight_pairs(self) -> None:

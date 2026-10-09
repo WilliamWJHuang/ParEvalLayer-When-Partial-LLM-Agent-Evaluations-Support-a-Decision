@@ -1,16 +1,14 @@
-# ParEvalLayer: Partial Evaluation for LLM Agents
+# ParEvalLayer: Compare LLM Agents Using Task Scores
 
 [![Tests](https://github.com/WilliamWJHuang/ParEvalLayer-When-Partial-LLM-Agent-Evaluations-Support-a-Decision/actions/workflows/smoke.yml/badge.svg?branch=main)](https://github.com/WilliamWJHuang/ParEvalLayer-When-Partial-LLM-Agent-Evaluations-Support-a-Decision/actions/workflows/smoke.yml) · [MIT License](LICENSE) · Python 3.12
 
-ParEvalLayer is an open-source decision layer for LLM agent evaluation. It compares scored results from two agents on the same tasks. Give it a CSV of paired scores and an improvement threshold. It produces a readable report and structured decision records: `promote`, `reject`, or `abstain` under the specified policy.
+ParEvalLayer compares two agents using scores you have already collected on the same tasks. Put both scores for each task in a CSV file, choose the minimum improvement you require, and run the comparison. The report shows the average score difference and a result: `promote`, `reject`, or `abstain`.
 
-Use your existing benchmark or evaluation harness to run and score the agents. ParEvalLayer reads those results; it can also replay selected prefixes of the file to examine decisions under partial evaluation budgets.
+You can compare all tasks or just the first part of the file. Your existing evaluation tool still runs the agents and scores their work; ParEvalLayer reads those scores.
 
-[Quick start](#quick-start) · [Worked example](docs/TUTORIAL.md) · [Use your own results](docs/USING_YOUR_RESULTS.md) · [Method and limits](docs/METHOD.md)
+[Quick start](#quick-start) · [Walk through an example](docs/TUTORIAL.md) · [Use your own results](docs/USING_YOUR_RESULTS.md) · [How the checks work](docs/METHOD.md)
 
-![ParEvalLayer workflow: paired task scores from an agent and baseline are replayed at fixed task-budget caps to produce decision reports. Inputs are already scored; the replay is retrospective.](assets/social-preview.png)
-
-This repository accompanies *ParEvalLayer: When Partial LLM-Agent Evaluations Support a Decision* by Wei-Jung Huang and Bonan Shen. It contains the decision-layer code, contract checks, source adapters, replay analyses, and small synthetic examples. The paper and PDF are not included here.
+![Put scores from two agents in a CSV, choose how many tasks to compare, and read the report. ParEvalLayer uses results you have already collected.](assets/social-preview.png)
 
 ## Quick start
 
@@ -21,7 +19,7 @@ git clone https://github.com/WilliamWJHuang/ParEvalLayer-When-Partial-LLM-Agent-
 cd ParEvalLayer
 ```
 
-Use Python 3.12. On Windows PowerShell, create and activate an isolated environment, then install the pinned core dependencies:
+Use Python 3.12. On Windows PowerShell, create a separate Python environment and install the required packages:
 
 ```text
 py -3.12 -m venv .venv
@@ -29,27 +27,25 @@ py -3.12 -m venv .venv
 python -m pip install -r requirements.txt
 ```
 
-On macOS or Linux, use `python3.12 -m venv .venv` followed by `. .venv/bin/activate`.
+On macOS or Linux, use `python3.12 -m venv .venv` followed by `. .venv/bin/activate`, then run the same install command.
 
-Run the paired-score example:
+Try the example:
 
 ```text
 python compare.py --input examples/paired_results.csv --tested candidate --comparison baseline --threshold 0.05
 ```
 
-Read `outputs/comparison/report.md` for the comparison. The same directory contains `summary.csv`, decision records, the normalized task stream, and the run configuration. The example uses synthetic scores and requires no downloads or API keys.
+Open `outputs/comparison/report.md`. The example uses eight tasks with made-up scores, so it needs no downloads or API keys. Its result is:
 
-The supplied eight-task example produces this summary at the default full-file cap:
-
-| Task fraction | Paired tasks | Mean candidate minus baseline score | Action |
+| Fraction of tasks | Tasks used | Average candidate score minus baseline score | Result |
 | ---: | ---: | ---: | --- |
 | 1.0 | 8 | 0.17 | `promote` |
 
-This is an illustration of the interface, not a benchmark result. The [worked tutorial](docs/TUTORIAL.md) follows the same file through a partial-budget comparison and explains how to read the result.
+These numbers demonstrate how the tool works. They do not describe a real agent's performance. The [step-by-step example](docs/TUTORIAL.md) explains the output and shows how to compare the first half of the file.
 
 ## Compare your own agents
 
-Export one row per task, with both systems scored by the same procedure on the same scale. Higher scores must mean better performance.
+Save one row per task, with a score from each agent. Score both agents in the same way, using the same scale. Higher scores must mean better performance.
 
 ```csv
 task_id,tested_score,comparison_score
@@ -64,17 +60,19 @@ Then run:
 python compare.py --input my_results.csv --tested my-agent --comparison baseline --threshold 0.05 --output-dir outputs/my-comparison
 ```
 
-`--threshold` is the required improvement in score units. For scores in `[0, 1]`, `0.05` means five percentage points. Scores are not rescaled. The optional `group` column identifies task categories for the coverage check.
+`--threshold` sets the minimum improvement you want to assess, in your original score units. The tool does not change the score scale. You can also add a `group` column, such as `web` or `code`, to require enough tasks from each category before making a decision.
 
-| Output | Meaning under the specified policy |
+The result combines the average score difference with a check of how much that average varies when tasks are sampled again:
+
+| Result | How to read it |
 | --- | --- |
-| `promote` | The observed mean improvement exceeds the threshold and passes the bootstrap tail check. |
-| `reject` | The observed mean improvement is at or below the threshold and passes the opposite tail check. This does not necessarily mean the candidate is worse. |
-| `abstain` | Required task groups are insufficiently represented, or the tail check does not resolve the comparison. |
+| `promote` | The average improvement is above your threshold, and the check supports that result. |
+| `reject` | The average improvement is at or below your threshold, and the check supports that result. The agent may still be slightly better than the baseline. |
+| `abstain` | The check cannot settle the comparison, or too few tasks from a required group have been included. |
 
-The default uses all rows. To replay partial budgets, specify `--budget-caps 0.5 1.0`. Rows are processed in file order, and each cap uses `ceil(cap * number_of_rows)` paired tasks. Fix the order and policy before inspecting outcomes if using the result to support a decision. Checks at several caps are unadjusted and do not provide an anytime-valid stopping rule.
+By default, the command uses all rows. Add `--budget-caps 0.5 1.0` to compare the first half and then the full file. Rows stay in file order. Choose the task order, amount of data, and improvement threshold before looking at the scores if you plan to use the result for a decision. Trying several settings and keeping a favorable answer can be misleading; the tool does not correct for this or tell you when it is safe to stop a live evaluation.
 
-See [the own-results guide](docs/USING_YOUR_RESULTS.md) for data preparation, output fields, limitations, and common errors. Existing output directories must be empty so that one run cannot silently replace another.
+See [Use your own results](docs/USING_YOUR_RESULTS.md) for the input format, output files, and common errors. Choose an empty or new output directory for each run to preserve earlier reports.
 
 ## Check the installation
 
@@ -82,50 +80,48 @@ See [the own-results guide](docs/USING_YOUR_RESULTS.md) for data preparation, ou
 python reproduce.py --check
 ```
 
-This runs the CSV workflow tests and the stream contract checks. The original JSONL example remains available through `python reproduce.py`.
+This checks the CSV workflow, the event-file reader, and their handling of invalid inputs. Run `python reproduce.py` to try the original JSONL example, which stores one record per line.
 
-The synthetic checks and Terminal-Bench interface checks passed in a fresh local environment. See [docs/VALIDATION.md](docs/VALIDATION.md) for the tested paths and reproduction limits.
+The example checks and Terminal-Bench checks passed in a fresh local environment. [Validation notes](docs/VALIDATION.md) list what was tested and what has not been reproduced.
 
-## What the evidence supports
+## About the research
 
-The reported study replays completed public benchmark records. It hides later task outcomes, applies a fixed-cap policy to the visible prefix, and checks terminal decisions against the decision from the completed shared record. These analyses describe the selected released records and simulated reveal orders.
+This repository accompanies *ParEvalLayer: When Partial LLM-Agent Evaluations Support a Decision* by Wei-Jung Huang and Bonan Shen. It includes the comparison code, tests, benchmark readers, analysis scripts, and examples. The paper and PDF are not included.
 
-The current evidence does not establish an anytime-valid live stopping rule, a population guarantee for future agent systems, or a universal budget reduction. The nominal bootstrap tail check is evaluated at fixed caps. Repeated inspection during a live run would require a time-uniform method and a protocol fixed before outcome access. See [docs/METHOD.md](docs/METHOD.md) for the estimand and statistical boundaries.
+The study starts with completed public benchmark results. It uses part of a result file, hides the later scores, and compares its decision with the decision from the full shared record. The findings describe those records and the task orders that were tested. They do not establish that every evaluation can be shortened or that the results will hold for future agents. [METHOD.md](docs/METHOD.md) gives the statistical details and assumptions.
 
-## Public replay data
+## Included benchmark data
 
-The repository includes compact OSWorld-Verified and Terminal-Bench tables with source and license notices. AppWorld, SWE-bench experiment records, and tau-bench trajectories must be obtained separately. Their adapters and replay code are included. Follow [docs/DATA.md](docs/DATA.md) for the acquisition, redistribution, and derivation details.
+Small OSWorld-Verified and Terminal-Bench tables are included with their source and license notices. AppWorld, SWE-bench experiment records, and tau-bench trajectories must be obtained separately. Their readers and analysis code are included. [DATA.md](docs/DATA.md) explains where the data came from and what may be shared.
 
-Verify packaged hashes and run the included Terminal-Bench pipeline:
+To check the packaged files and run the included Terminal-Bench example:
 
 ```text
 python reproduce.py --verify
 python reproduce.py --pipeline terminal
 ```
 
-The `--pipeline tau` and `--pipeline all` options additionally require the separately acquired tau-bench inputs.
+The `--pipeline tau` and `--pipeline all` options also need separately acquired tau-bench inputs. The repository alone cannot regenerate every result in the paper. See [REPRODUCING.md](docs/REPRODUCING.md) for the supported commands and additional inputs.
 
-Availability of an input does not imply that every paper result can be regenerated from the repository alone. [docs/REPRODUCING.md](docs/REPRODUCING.md) separates the offline smoke path from source acquisition and full replay commands.
+## Where to find things
 
-## Repository map
-
-- `reproduce.py` runs the synthetic example, checks, hash verification, and supported compact-data pipelines.
-- `compare.py` compares your own paired scores from a CSV file.
-- `scripts/` contains the decision layer, stream adapter, source builders, replay analyses, diagnostics, and figure code.
-- `examples/` contains synthetic paired scores and a task-outcome stream.
-- `analysis/public_backtest/` contains compact inputs or derived outputs whose release conditions have been checked.
-- `docs/METHOD.md` defines the method, estimand, dependence, controls, and limitations.
-- `docs/REPRODUCING.md` gives practical execution paths.
-- `docs/DATA.md` records data provenance and redistribution status.
+- `compare.py` reads your CSV and writes a comparison report.
+- `reproduce.py` runs examples, tests, file checks, and selected benchmark analyses.
+- `scripts/` holds the calculation code, benchmark readers, analysis scripts, and figure code.
+- `examples/` contains made-up scores for trying the commands.
+- `analysis/public_backtest/` contains the benchmark tables approved for this release.
+- `docs/` contains the tutorials, method, data sources, and reproduction instructions.
 
 ## Citation
 
-Citation metadata are provided in [CITATION.cff](CITATION.cff), including the paper title and authors.
+Use [CITATION.cff](CITATION.cff) for the paper title and author details when citing this work.
 
 ## Help and contributions
 
-Use [GitHub Issues](https://github.com/WilliamWJHuang/ParEvalLayer-When-Partial-LLM-Agent-Evaluations-Support-a-Decision/issues) for questions, bugs, and proposed adapters. For a reproducible bug report, include the command, Python version, error message, and a minimal synthetic CSV. For code changes, describe the intended behavior and run `python reproduce.py --check`. Changes to the statistical policy should state which assumption or decision rule they alter.
+Use [GitHub Issues](https://github.com/WilliamWJHuang/ParEvalLayer-When-Partial-LLM-Agent-Evaluations-Support-a-Decision/issues) for questions, bugs, and requests to read other result formats. For a bug report, include the command, Python version, error message, and a small CSV with made-up scores that shows the problem.
+
+For code changes, describe what should happen and run `python reproduce.py --check`. If a change affects the calculation or decision rules, explain that change explicitly.
 
 ## License
 
-Project code and documentation are released under the [MIT License](LICENSE). Third-party data and notices retain their original terms, including the OSWorld dataset's MIT declaration and the Terminal-Bench leaderboard dataset's Apache 2.0 declaration. See [docs/DATA.md](docs/DATA.md) for provenance and redistribution details.
+Project code and documentation use the [MIT License](LICENSE). Third-party data keep their own terms: the OSWorld dataset declares MIT, and the Terminal-Bench leaderboard dataset declares Apache 2.0. [DATA.md](docs/DATA.md) records the source notices and sharing conditions.

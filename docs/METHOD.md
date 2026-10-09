@@ -60,3 +60,13 @@ Full-record task counts and resource totals may be used retrospectively to defin
 The adapter and verification scripts can test schema validity, malformed inputs, batch equivalence, prefix isolation under future-row mutation, resource accounting, trace integrity, and separation of completed-record audit fields. These checks cover the implementation boundary. They do not show that an upstream benchmark record is free of data contamination or scoring error.
 
 The current public records and policy variants were available during method development. The packaged analyses are retrospective and should be read as descriptive or exploratory evidence for the selected released records.
+
+## CSV counting and decision rules
+
+These details describe the `compare.py` CSV interface.
+
+A task cap selects `ceil(cap * N)` rows, where `N` is the number of paired tasks in the CSV, with at least one task selected. For each group with `N_g` tasks, a prefix of `k` tasks requires at least `max(1, floor(k * N_g / N))` observations from that group. Missing coverage leads to `abstain`.
+
+`promote` requires a mean difference strictly above the threshold and a bootstrap fraction at or below the threshold no larger than `alpha`. `reject` requires a mean difference at or below the threshold and the opposite bootstrap fraction no larger than `alpha`. Otherwise the result is `abstain`; insufficient group coverage also causes abstention.
+
+The bootstrap fractions are policy checks, not reported p-values or calibrated confidence levels. They are not confidence intervals. The CSV defaults are `alpha=0.05`, `--bootstrap-samples 500`, and `--seed 20260613`. A fixed seed makes the calculation repeatable; it does not remove Monte Carlo error or correct an unsuitable statistical model.

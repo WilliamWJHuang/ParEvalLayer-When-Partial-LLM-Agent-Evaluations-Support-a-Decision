@@ -1,19 +1,21 @@
-# Comparing your own agents
+# Use your own results
 
-ParEvalLayer accepts task scores that your evaluation harness has already produced. It does not execute agents, define benchmark tasks, or grade responses. You need a candidate system, a comparison system, and results for both on the same tasks.
+You need two scores for each task: one from the agent you want to test and one from the agent you want to compare against. Run and score both agents with your existing tools, then give those scores to ParEvalLayer.
 
-For a complete example with expected output, start with [How to compare two LLM agents using paired evaluation scores](TUTORIAL.md).
+For a worked example first, see [Compare two LLM agents from a CSV file](TUTORIAL.md).
 
-## Prepare paired scores
+## Prepare the CSV
 
-Save a UTF-8 CSV with these columns:
+Save the file as UTF-8 CSV with these columns:
 
-| Column | Required | Content |
+| Column | Required | What to put here |
 | --- | --- | --- |
-| `task_id` | Yes | A unique, nonempty task identifier. |
-| `tested_score` | Yes | The candidate's finite numeric score. |
-| `comparison_score` | Yes | The comparison system's finite numeric score. |
-| `group` | No | A nonempty task category. If the column is omitted, every task belongs to `all`. |
+| `task_id` | Yes | A different, nonempty name or ID for each task. |
+| `tested_score` | Yes | The score from the agent you want to test. |
+| `comparison_score` | Yes | The other agent's score on the same task. |
+| `group` | No | A task category. If you leave out the column, all tasks belong to one group called `all`. If you include it, fill in every row. |
+
+For example:
 
 ```csv
 task_id,group,tested_score,comparison_score
@@ -23,63 +25,80 @@ web_002,web,0.9,0.7
 code_002,code,0.8,0.6
 ```
 
-These values illustrate the format only. The small example is not evidence about real agent performance.
+These are made-up scores to show the format. For your own results, score both agents in the same way. Higher numbers must mean better performance. You can use pass/fail scores such as `0` and `1`, or another numeric scale. Blank scores, `NaN`, and infinity are rejected.
 
-Use the same scorer and score scale for both systems, with higher scores indicating better outcomes. Binary success scores and numeric rubric scores can be represented. A threshold of `0.05` has a different meaning on a 0 to 1 scale than on a 0 to 100 scale. The importer neither normalizes scores nor checks that the scoring procedure is comparable.
+ParEvalLayer uses the scores as written. An improvement of `0.05` means something different on a 0 to 1 scale than on a 0 to 100 scale. The program cannot check whether your scoring methods are comparable.
 
-Each row must contain both scores. Resolve missing runs according to a rule fixed before inspecting the comparison; do not silently drop difficult tasks or replace missing scores with zero. If tasks have repeated trials, define the task-level aggregation before preparing this file. The current bootstrap resamples task differences individually and does not model dependence among repeated trials or related tasks.
+Keep one row per task, with both scores present. Decide how to handle missing runs before looking at which agent won. Do not quietly remove difficult tasks or fill missing scores with zero. If you ran each task several times, decide how to combine those attempts into a task score before creating the CSV. The calculation does not account for links between repeated attempts or closely related tasks.
 
-At least two paired tasks are required by the CSV interface. That is an input check, not evidence that two tasks suffice for a reliable scientific conclusion. Small samples and identical differences can yield degenerate bootstrap distributions.
+The file must contain at least two tasks. That is a requirement for running the program, not a promise that two tasks support a reliable conclusion. With very few tasks, the check has little information to work with. If every task has the same score difference, sampling those differences again will show no variation.
 
-## Run a comparison
+## Run the comparison
 
-After installing the dependencies in the README, run from the repository directory:
+After following the [installation instructions](../README.md#quick-start), run this from the repository folder:
 
 ```text
 python compare.py --input my_results.csv --tested my-agent-v2 --comparison my-agent-v1 --threshold 0.05 --output-dir outputs/my-comparison
 ```
 
-The system names must be distinct. They label the scores you supply; the program cannot verify which agent produced them. The threshold is a nonnegative required improvement in the original score units. The reported difference is the mean of `tested_score - comparison_score` across the selected tasks, with equal weight per task.
+Use two different names for the agents. Those names label the score columns; the program cannot verify which agent produced the scores.
 
-The default cap is `1.0`, which uses all rows. To examine the first half and then the complete file:
+`--threshold` is the improvement you want to assess, in the original score units. It must be zero or greater. The report subtracts the comparison agent's score from the tested agent's score on each task, then takes the average. Every task has equal weight.
+
+## Compare part of the file
+
+The default `--budget-caps 1.0` uses all rows. To compare the first half and then the full file, run:
 
 ```text
 python compare.py --input my_results.csv --tested my-agent-v2 --comparison my-agent-v1 --threshold 0.05 --budget-caps 0.5 1.0 --output-dir outputs/prefix-comparison
 ```
 
-The importer preserves file order. It does not sort by score, shuffle, or balance groups. A task cap selects `ceil(cap * N)` rows, where `N` is the number of paired tasks in the CSV. For each group with `N_g` tasks, a prefix of `k` tasks requires at least `max(1, floor(k * N_g / N))` observations from that group. Missing coverage leads to `abstain`. Define categories from task metadata, not from observed outcomes.
+Rows stay in the order you saved them. The program does not sort by score, shuffle tasks, or move categories around. It multiplies the requested fraction by the total number of rows and rounds up to a whole task, with at least one task used.
 
-The complete file supplies the task count and group counts. Scores after a selected prefix are excluded from that prefix's decision. This is retrospective replay of a completed paired file. It is not a service that interrupts a running evaluator when a decision appears.
+If you supply a `group` column, every category must be represented before the tool can decide. The required counts depend on the size of each category and how many rows you use. If a category is short of its required count, the answer is `abstain`. Choose categories from the tasks' descriptions or other known properties, not from their scores. The [exact counting rules](METHOD.md#csv-counting-and-decision-rules) are in the method notes.
 
-Optional controls include `--alpha` (default `0.05`), `--bootstrap-samples` (default `500`), and `--seed` (default `20260613`). Use `python compare.py --help` for all options. A fixed seed makes the calculation repeatable; it does not remove Monte Carlo error or correct an unsuitable statistical model.
+The full file tells the tool how many tasks and groups exist. For a comparison using only the first part, later scores do not affect that answer. This lets you examine completed results at different task counts; it does not control a running evaluation.
 
-## Read the outputs
+Choose the row order, fraction of tasks, and improvement threshold before viewing scores if you plan to use the answer for a decision. Trying many settings and keeping a favorable answer can change how often you make a wrong decision. These checks do not correct for the extra attempts, establish when it is safe to stop a live run, or guarantee the same result on future tasks or agents.
 
-| File | Contents |
+## Read the output files
+
+Start with `report.md`. It explains the result in words. The other files are useful if you want to check the run or use its output in your own code:
+
+| File | What it contains |
 | --- | --- |
-| `report.md` | Human-readable comparison, settings, and interpretation. |
-| `summary.csv` | One summary row per requested cap. |
-| `decisions.jsonl` | Structured terminal decision records. |
-| `trace.jsonl` | Prefix traces for the requested caps. Earlier prefixes are marked `continue`. |
-| `stream.jsonl` | The paired CSV converted to the task-outcome stream format. |
-| `run.json` | Input hash, run settings, and dependency versions. |
+| `summary.csv` | A short table with one row for each requested fraction of tasks. |
+| `decisions.jsonl` | Detailed results, stored as one JSON record per line. |
+| `trace.jsonl` | The checks made as more tasks are included. Earlier steps say `continue` until the requested fraction is reached. |
+| `stream.jsonl` | Your CSV converted into task records for the comparison code. |
+| `run.json` | The input file's identifying hash, the settings, and package versions. |
 
-`promote` requires a mean difference strictly above the threshold and a bootstrap fraction at or below the threshold no larger than `alpha`. `reject` requires a mean difference at or below the threshold and the opposite bootstrap fraction no larger than `alpha`. Otherwise the result is `abstain`; insufficient group coverage also causes abstention.
+An average improvement above the threshold can produce `promote`; one at or below it can produce `reject`. Both answers also have to pass the built-in check. Otherwise the result is `abstain`. Missing tasks from a required group also produce `abstain`.
 
-The bootstrap fractions are policy checks, not reported p-values or calibrated confidence levels. A `reject` result can occur for a candidate that improves on the baseline but falls short of the chosen threshold. An `abstain` result does not establish equivalence.
+`reject` does not necessarily mean the tested agent is worse. It can mean an improvement is smaller than you required. `abstain` does not prove the agents are equal. The check's numbers are not a probability that one agent is better or a guaranteed range for the true improvement. The [method notes](METHOD.md) explain exactly how those numbers are used.
 
-Fix the threshold, task order, coverage categories, and selected cap before viewing outcomes when using the policy for a decision. Trying several caps or settings and retaining the most favorable result introduces selection. No multiple-look adjustment is applied. The output does not certify a live stopping rule, future-agent performance, or generalization to a new task distribution. See [METHOD.md](METHOD.md) for the method's scope.
+## Other settings
+
+Use `python compare.py --help` to see all options. These settings control the additional check:
+
+| Option | Default | Purpose |
+| --- | --- | --- |
+| `--alpha` | `0.05` | Sets the cutoff used by the check. |
+| `--bootstrap-samples` | `500` | Sets how many times to draw a sample of the task differences. |
+| `--seed` | `20260613` | Makes those random draws repeatable for the same inputs and settings. |
+
+The [method notes](METHOD.md#csv-counting-and-decision-rules) explain these settings in more detail. A fixed seed helps repeat a run; it does not remove the variation caused by random sampling or make an unsuitable calculation valid.
 
 ## Common errors
 
 | Error | What to check |
 | --- | --- |
-| Missing or unknown column | Use the column names listed above; remove dataframe index columns. |
-| Duplicate task | Keep one prespecified paired result per task. |
-| Missing or nonfinite score | Resolve the source result; `NaN`, infinity, and blank scores are rejected. |
-| Blank group | Fill each group cell, or omit the column if no grouping is intended. |
-| Nonempty output directory | Choose a new `--output-dir`; prior outputs are preserved. |
+| Missing or unknown column | Use the column names listed above. Remove any extra index column added by your export tool. |
+| Duplicate task | Keep one row per task, using a rule chosen before you inspect the results. |
+| Missing or nonfinite score | Check the original result. Blank scores, `NaN`, and infinity are rejected. |
+| Blank group | Fill in every group cell, or leave out the whole column. |
+| Nonempty output directory | Choose a new `--output-dir` to preserve earlier reports. |
 
-Quote paths or system labels that contain spaces. Input and output paths may be absolute. To call the tool from another working directory, use an absolute path to `compare.py` as well.
+Put quotes around paths or agent names containing spaces. You can use full file paths for both input and output. To run the command from another folder, use the full path to `compare.py` too.
 
-For an existing event-producing evaluator, the lower-level JSONL adapter remains in `scripts/run_stream_decision_adapter.py`. Its manifest declares the run and system identities. Events must agree with those identities; a supplied event source must match the manifest source.
+If your evaluator already writes one task result at a time, see `scripts/run_stream_decision_adapter.py` for the JSONL interface. Its first record identifies the run and the two systems. Later records must agree with those names; if they include a source name, it must match too.

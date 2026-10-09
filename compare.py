@@ -87,19 +87,67 @@ def nonnegative_int(text: str) -> int:
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="Compare paired tested and comparison scores from a wide CSV file."
+        description=(
+            "Compare two systems on the same completed tasks. The input CSV must have "
+            "one row per task with tested_score and comparison_score columns."
+        )
     )
-    parser.add_argument("--input", type=Path, required=True)
-    parser.add_argument("--tested", required=True)
-    parser.add_argument("--comparison", required=True)
-    parser.add_argument("--threshold", type=finite_nonnegative, required=True)
-    parser.add_argument("--budget-caps", type=budget_cap, nargs="+", default=[1.0])
-    parser.add_argument("--alpha", type=probability, default=0.05)
-    parser.add_argument("--bootstrap-samples", type=positive_int, default=500)
-    parser.add_argument("--seed", type=nonnegative_int, default=20260613)
-    parser.add_argument("--source", default=None)
-    parser.add_argument("--run-id", default=None)
-    parser.add_argument("--output-dir", type=Path, default=DEFAULT_OUTPUT)
+    parser.add_argument(
+        "--input", type=Path, required=True, help="Paired wide CSV file to compare."
+    )
+    parser.add_argument(
+        "--tested", required=True, help="Name of the system being tested."
+    )
+    parser.add_argument(
+        "--comparison", required=True, help="Name of the system used for comparison."
+    )
+    parser.add_argument(
+        "--threshold",
+        type=finite_nonnegative,
+        required=True,
+        help="Requested improvement in the input score units; promote requires more than this value.",
+    )
+    parser.add_argument(
+        "--budget-caps",
+        type=budget_cap,
+        nargs="+",
+        default=[1.0],
+        help="Fractions of completed task rows to report (default: 1.0).",
+    )
+    parser.add_argument(
+        "--alpha",
+        type=probability,
+        default=0.05,
+        help="Cutoff used by the built-in decision check (default: 0.05).",
+    )
+    parser.add_argument(
+        "--bootstrap-samples",
+        type=positive_int,
+        default=500,
+        help="Number of repeated draws used by the built-in decision check (default: 500).",
+    )
+    parser.add_argument(
+        "--seed",
+        type=nonnegative_int,
+        default=20260613,
+        help="Whole-number seed that makes repeated draws reproducible (default: 20260613).",
+    )
+    parser.add_argument(
+        "--source",
+        default=None,
+        help="Label for the result source (default: input file name without its extension).",
+    )
+    parser.add_argument(
+        "--run-id",
+        default=None,
+        help="Run label (default: derived from the input file hash).",
+    )
+    parser.add_argument(
+        "--output-dir",
+        type=Path,
+        default=DEFAULT_OUTPUT,
+        help=f"New directory for all output files (default: {DEFAULT_OUTPUT}).",
+    )
     return parser.parse_args(argv)
 
 
@@ -269,44 +317,72 @@ def write_report(
     threshold: float,
     cards: list[dict[str, Any]],
 ) -> None:
+    def report_reason(card: dict[str, Any]) -> str:
+        action = card["decision"]["action"]
+        if action == "promote":
+            return "Average is above the requested improvement, and the built-in check passes."
+        if action == "reject":
+            return "Average is at or below the requested improvement, and the built-in check passes."
+        if card["decision"].get("abstention_reason") == "missing_required_strata":
+            return "Not enough tasks from each group are included."
+        return "The result is unclear after the built-in check."
+
     lines = [
-        "# Paired comparison report",
+        "# Agent comparison report",
         "",
         f"Source: `{source}`",
         f"Input: `{input_path}`",
-        f"Comparison: `{tested}` minus `{comparison}` on the input score scale.",
-        "Scores are interpreted as higher-is-better. Both columns must use the same "
-        "meaningful and comparable score scale; this tool does not normalize them.",
-        f"Promotion threshold: `{threshold:g}`.",
+        f"Tested system: `{tested}`",
+        f"Comparison system: `{comparison}`",
+        f"Requested improvement: `{threshold:g}` score units.",
         "",
-        "Each budget result uses a fixed retrospective prefix in CSV row order. "
-        "Promote means the resampling rule supports a mean difference above the threshold. "
-        "Reject means the rule supports a difference at or below the threshold, so the tested "
-        "system has not established the requested improvement. It does not establish that the "
-        "tested system is worse. Abstain reflects unresolved resampling uncertainty or missing "
-        "group coverage.",
-        "",
-        "These are fixed-prefix retrospective results. They provide no live monitoring or "
-        "anytime-valid guarantee. Multiple budget caps are reported without multiplicity "
-        "adjustment. The bootstrap tail fractions are decision-rule quantities, not p-values "
-        "or confidence intervals.",
-        "",
-        "The input hash, row count, and group counts in `run.json` describe the complete "
-        "CSV. Each outcome in the table uses only its stated prefix. Results depend on CSV row "
-        "order because each cap selects a fixed row prefix.",
-        "",
-        "See `run.json` for the input metadata and the alpha, resample count, seed, and other "
-        "settings used for this run.",
-        "",
-        "| Cap | Prefix tasks | Mean difference | Action | Reason |",
+        "| Fraction of tasks | Tasks used | Average score difference | Result | Reason |",
         "| ---: | ---: | ---: | --- | --- |",
     ]
     for card in cards:
         lines.append(
             f"| {card['budget_cap']:.6g} | {card['observed']['tasks']} | "
-            f"{card['decision']['partial_delta']:.6g} | {card['decision']['action']} | "
-            f"{decision_reason(card)} |"
+            f"{card['decision']['partial_delta']:.6g} | {card['decision']['action'].title()} | "
+            f"{report_reason(card)} |"
         )
+    lines.extend(
+        [
+            "",
+            "## How to read the results",
+            "",
+            f"Average score difference is `{tested}` minus `{comparison}`, averaged across the "
+            "tasks used in that row. Scores are treated as higher is better. Both score columns "
+            "must use the same meaningful units, and the tool does not change their scale.",
+            "",
+            f"Promote means the average score difference is strictly greater than `{threshold:g}` "
+            "and the built-in check passes. Reject means the average is at or below that value and "
+            "the check passes. Reject says that the requested improvement was not established; it "
+            "does not necessarily mean the tested agent is worse. Abstain means the result is unclear "
+            "or there are not enough tasks from each group. It is not proof that the systems are the "
+            "same.",
+            "",
+            "The check repeatedly draws from the task differences to see how much the average "
+            "changes. Its numerical checks are not the probability that the tested system is better, "
+            "and they are not a range that states where the true difference must be.",
+            "",
+            "## About this report",
+            "",
+            "Each row applies only to its selected task count from the completed input file. It uses "
+            "the first tasks in your completed results, in CSV row order. The selected fraction "
+            "chooses the row count, not the scores. Later rows are excluded from that result, while "
+            "the full file hash, row count, and group counts in `run.json` still describe the known "
+            "input file.",
+            "",
+            "This report uses saved results and does not control a live agent. It gives no guarantee for a "
+            "workflow that repeatedly checks results and stops when a preferred answer appears. When "
+            "several task counts are tried, there are more chances to get a favorable answer. The check "
+            "does not correct for those extra attempts.",
+            "",
+            "See `run.json` for the settings linked to this report, including the input file details, "
+            "decision cutoff, number of repeated draws, and seed. See `docs/METHOD.md` for technical "
+            "details about the method.",
+        ]
+    )
     path.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
