@@ -1,6 +1,6 @@
 # ParEvalLayer: Compare LLM Agents Using Task Scores
 
-[![Tests](https://github.com/WilliamWJHuang/ParEvalLayer-When-Partial-LLM-Agent-Evaluations-Support-a-Decision/actions/workflows/smoke.yml/badge.svg?branch=main)](https://github.com/WilliamWJHuang/ParEvalLayer-When-Partial-LLM-Agent-Evaluations-Support-a-Decision/actions/workflows/smoke.yml) · [MIT License](LICENSE) · Python 3.12
+[![Tests](https://github.com/WilliamWJHuang/ParEvalLayer-partial-agent-evaluation/actions/workflows/smoke.yml/badge.svg?branch=main)](https://github.com/WilliamWJHuang/ParEvalLayer-partial-agent-evaluation/actions/workflows/smoke.yml) · [MIT License](LICENSE) · Python 3.12
 
 ParEvalLayer compares two agents using scores you have already collected on the same tasks. Put both scores for each task in a CSV file, choose the minimum improvement you require, and run the comparison. The report shows the average score difference and a result: `promote`, `reject`, or `abstain`.
 
@@ -15,7 +15,7 @@ You can compare all tasks or just the first part of the file. Your existing eval
 Clone the repository, or download and extract its ZIP:
 
 ```text
-git clone https://github.com/WilliamWJHuang/ParEvalLayer-When-Partial-LLM-Agent-Evaluations-Support-a-Decision.git ParEvalLayer
+git clone https://github.com/WilliamWJHuang/ParEvalLayer-partial-agent-evaluation.git ParEvalLayer
 cd ParEvalLayer
 ```
 
@@ -118,7 +118,7 @@ Use [CITATION.cff](CITATION.cff) for the paper title and author details when cit
 
 ## Help and contributions
 
-Use [GitHub Issues](https://github.com/WilliamWJHuang/ParEvalLayer-When-Partial-LLM-Agent-Evaluations-Support-a-Decision/issues) for questions, bugs, and requests to read other result formats. For a bug report, include the command, Python version, error message, and a small CSV with made-up scores that shows the problem.
+Use [GitHub Issues](https://github.com/WilliamWJHuang/ParEvalLayer-partial-agent-evaluation/issues) for questions, bugs, and requests to read other result formats. For a bug report, include the command, Python version, error message, and a small CSV with made-up scores that shows the problem.
 
 For code changes, describe what should happen and run `python reproduce.py --check`. If a change affects the calculation or decision rules, explain that change explicitly.
 
